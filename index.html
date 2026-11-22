@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Expense Tracker</title>
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#2563eb">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            flex: 1;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px #00000010;
+        }
+
+        .card h3 {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .card p {
+            font-size: 25px;
+            font-weight: bold;
+            margin-top: 12px;
+            color: #2563eb;
+        }
+
+        .form-box, .history {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px #00000010;
+        }
+
+        .form-box h2, .history h2 {
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+            gap: 10px;
+        }
+
+        .expense-item h3 {
+            color: #334155;
+            font-size: 16px;
+        }
+
+        .expense-item p {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            padding: 8px 12px;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .amount {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        @media(max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+
+            .cards {
+                flex-direction: column;
+            }
+        }
+
+        .progress-container {
+    width: 100%;
+    height: 20px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+#progressBar {
+    width: 0%;
+    height: 100%;
+    background: #16a34a;
+    transition: width 0.5s;
+}
+
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>💰 Smart Expense Tracker</h1>
+
+        <p class="subtitle">
+            Manage your daily expenses smartly!
+        </p>
+
+        <div class="cards">
+
+    <div class="card">
+        <h3>Total Expenses</h3>
+        <p id="total">₹0</p>
+    </div>
+
+    <div class="card">
+        <h3>Total Transactions</h3>
+        <p id="count">0</p>
+    </div>
+
+    <div class="card">
+        <h3>This Month</h3>
+        <p id="monthly">₹0</p>
+    </div>
+
+    </div>
+
+    <div class="history">
+
+    <h2>Monthly Budget Management</h2>
+
+    <input
+        type="number"
+        id="budgetInput"
+        placeholder="Enter Monthly Budget (₹)"
+        min="1"
+    >
+
+    <button onclick="setBudget()">
+        Set Budget
+    </button>
+
+    <h3 id="budget">Monthly Budget: ₹0</h3>
+
+    <h3 id="spent">Total Spent: ₹0</h3>
+
+    <h3 id="remaining">Remaining: ₹0</h3>
+
+    <div class="progress-container">
+    <div id="progressBar"></div>
+</div>
+
+<h3 id="budgetPercentage">0% Used</h3>
+
+    <p id="budgetMessage"></p>
+
+</div>
+
+        <div class="form-box">
+
+            <h2>Add New Expense</h2>
+
+            <input
+                type="text"
+                id="title"
+                placeholder="Expense Name"
+            >
+
+            <input
+                type="number"
+                id="amount"
+                placeholder="Amount (₹)"
+                min="0.01"
+                step="0.01"
+            >
+
+            <select id="category">
+
+                <option value="">Select Category</option>
+
+                <option>Food</option>
+                <option>Travel</option>
+                <option>Shopping</option>
+                <option>Education</option>
+                <option>Entertainment</option>
+                <option>Other</option>
+
+            </select>
+
+            <input
+                type="date"
+                id="date"
+            >
+
+            <button onclick="addExpense()">
+                
+                Add Expense
+            </button>
+
+        </div>
+
+          <div class="history">
+
+          <h2>Category-wise Expense Analysis</h2>
+
+          <canvas id="expenseChart"></canvas>
+
+        </div>
+
+        <div class="history">
+
+            <h2>Expense History</h2>
+            <div class="filters">
+
+    <input
+        type="text"
+        id="search"
+        placeholder="Search expense..."
+        oninput="filterExpenses()"
+    >
+
+    <select id="filterCategory" onchange="filterExpenses()">
+
+        <option value="">All Categories</option>
+        <option>Food</option>
+        <option>Travel</option>
+        <option>Shopping</option>
+        <option>Education</option>
+        <option>Entertainment</option>
+        <option>Other</option>
+
+    </select>
+
+</div>
+
+            <div id="expenseList">
+                No expenses added yet.
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let expenses = JSON.parse(
+            localStorage.getItem("expenses")
+        ) || [];
+
+        let monthlyBudget = Number(
+    localStorage.getItem("monthlyBudget")
+) || 0;
+
+        let myChart = null;
+
+        document.getElementById("date").value =
+            new Date().toISOString().split("T")[0];
+
+        function saveData() {
+
+            localStorage.setItem(
+                "expenses",
+                JSON.stringify(expenses)
+            );
+
+        }
+
+        function addExpense() {
+
+            let title = document.getElementById("title").value.trim();
+
+            let amount = Number(
+                document.getElementById("amount").value
+            );
+
+            let category =
+                document.getElementById("category").value;
+
+            let date =
+                document.getElementById("date").value;
+
+            if (
+                title === "" ||
+                !Number.isFinite(amount) ||
+                amount <= 0 ||
+                category === "" ||
+                date === ""
+            ) {
+
+                alert("Please enter all valid details!");
+
+                return;
+
+            }
+
+            let expense = {
+
+                id: Date.now(),
+
+                title: title,
+
+                amount: amount,
+
+                category: category,
+
+                date: date
+
+            };
+
+            expenses.push(expense);
+
+            saveData();
+
+            displayExpenses();
+
+            document.getElementById("title").value = "";
+
+            document.getElementById("amount").value = "";
+
+            document.getElementById("category").value = "";
+
+            document.getElementById("date").value =
+                new Date().toISOString().split("T")[0];
+
+        }
+
+        function displayExpenses() {
+
+            let list =
+                document.getElementById("expenseList");
+
+            let total = 0;
+            let monthlyTotal = 0;
+
+            let currentMonth = new Date().getMonth();
+
+            let currentYear = new Date().getFullYear(); 
+            list.innerHTML = "";
+
+            if (expenses.length === 0) {
+
+                list.innerHTML = "No expenses added yet.";
+
+            }
+
+            expenses.forEach(function(expense) {
+
+                total += expense.amount;
+
+                let item = document.createElement("div");
+
+                item.className = "expense-item";
+
+                let details = document.createElement("div");
+
+                let heading = document.createElement("h3");
+
+                heading.textContent = expense.title;
+
+                let info = document.createElement("p");
+
+                let expenseDate = new Date(expense.date + "T00:00:00");
+
+                    if (
+                    expenseDate.getMonth() === currentMonth &&
+                    expenseDate.getFullYear() === currentYear
+                    ) {
+                    monthlyTotal += expense.amount;
+                    }
+
+                info.textContent =
+                    expense.category + " | " + expense.date;
+
+                details.appendChild(heading);
+
+                details.appendChild(info);
+
+                let price = document.createElement("span");
+
+                price.className = "amount";
+
+                price.textContent =
+                    "₹" + expense.amount.toFixed(2);
+
+                let deleteButton =
+                    document.createElement("button");
+
+                deleteButton.textContent = "Delete";
+
+                deleteButton.className = "delete-btn";
+
+                deleteButton.onclick = function() {
+
+                    deleteExpense(expense.id);
+
+                };
+
+                item.appendChild(details);
+
+                item.appendChild(price);
+
+                item.appendChild(deleteButton);
+
+                list.appendChild(item);
+
+            });
+
+            document.getElementById("total").textContent =
+                "₹" + total.toFixed(2);
+
+            document.getElementById("count").textContent =
+                expenses.length;
+            
+            document.getElementById("monthly").textContent =
+            "₹" + monthlyTotal.toFixed(2); 
+            
+            showChart();
+            updateBudget();
+
+        }
+
+        function deleteExpense(id) {
+
+            expenses = expenses.filter(function(expense) {
+
+                return expense.id !== id;
+
+            });
+
+            saveData();
+
+            displayExpenses();
+
+        }
+
+        displayExpenses();
+
+        
+
+function showChart() {
+
+    let categoryTotals = {};
+
+    expenses.forEach(function(expense) {
+
+        if (categoryTotals[expense.category]) {
+
+            categoryTotals[expense.category] += expense.amount;
+
+        } else {
+
+            categoryTotals[expense.category] = expense.amount;
+
+        }
+
+    });
+
+    let categories = Object.keys(categoryTotals);
+
+    let amounts = Object.values(categoryTotals);
+
+    let ctx = document.getElementById("expenseChart");
+
+    if (myChart) {
+
+        myChart.destroy();
+
+    }
+
+    myChart = new Chart(ctx, {
+
+        type: "doughnut",
+
+        data: {
+
+            labels: categories,
+
+            datasets: [{
+
+                label: "Expenses",
+
+                data: amounts
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            plugins: {
+
+                legend: {
+
+                    position: "bottom"
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+function setBudget() {
+
+    let value = Number(
+        document.getElementById("budgetInput").value
+    );
+
+    if (!Number.isFinite(value) || value <= 0) {
+
+        alert("Please enter a valid budget!");
+
+        return;
+
+    }
+
+    monthlyBudget = value;
+
+    localStorage.setItem(
+        "monthlyBudget",
+        monthlyBudget
+    );
+
+    document.getElementById("budgetInput").value = "";
+
+    updateBudget();
+
+}
+
+
+function updateBudget() {
+
+    let currentMonth = new Date().getMonth();
+
+    let currentYear = new Date().getFullYear();
+
+    let totalSpent = 0;
+
+    expenses.forEach(function(expense) {
+
+        let date = new Date(expense.date + "T00:00:00");
+
+        if (
+            date.getMonth() === currentMonth &&
+            date.getFullYear() === currentYear
+        ) {
+
+            totalSpent += expense.amount;
+
+        }
+
+    });
+
+    let remaining = monthlyBudget - totalSpent;
+
+    document.getElementById("budget").textContent =
+        "Monthly Budget: ₹" + monthlyBudget;
+
+    document.getElementById("spent").textContent =
+        "Total Spent: ₹" + totalSpent.toFixed(2);
+
+    document.getElementById("remaining").textContent =
+        "Remaining: ₹" + remaining.toFixed(2);
+
+    let percentage = monthlyBudget > 0
+        ? (totalSpent / monthlyBudget) * 100
+        : 0;
+
+    let progress = Math.min(percentage, 100);
+
+    document.getElementById("budgetPercentage").textContent =
+    percentage.toFixed(1) + "% Used";
+
+    document.getElementById("progressBar").style.width =
+        progress + "%";
+
+    let message = "";
+
+    if (monthlyBudget === 0) {
+
+        message = "Please set your monthly budget.";
+
+    } else if (percentage >= 100) {
+
+        message = "Budget exceeded!";
+
+    } else if (percentage >= 80) {
+
+        message = "Warning! You are close to your budget.";
+
+    } else {
+
+        message = "Good! You are managing your budget.";
+
+    }
+
+    document.getElementById("budgetMessage").textContent =
+        message;
+
+}
+
+function filterExpenses() {
+
+    let searchText = document
+        .getElementById("search")
+        .value.toLowerCase();
+
+    let selectedCategory = document
+        .getElementById("filterCategory")
+        .value;
+
+    let filteredExpenses = expenses.filter(function(expense) {
+
+        let matchName = expense.title
+            .toLowerCase()
+            .includes(searchText);
+
+        let matchCategory =
+            selectedCategory === "" ||
+            expense.category === selectedCategory;
+
+        return matchName && matchCategory;
+
+    });
+
+    let list = document.getElementById("expenseList");
+
+    list.innerHTML = "";
+
+    if (filteredExpenses.length === 0) {
+
+        list.textContent = "No matching expenses found.";
+
+        return;
+
+    }
+
+    filteredExpenses.forEach(function(expense) {
+
+        let item = document.createElement("div");
+
+        item.className = "expense-item";
+
+        let details = document.createElement("div");
+
+        let heading = document.createElement("h3");
+
+        heading.textContent = expense.title;
+
+        let info = document.createElement("p");
+
+        info.textContent =
+            expense.category + " | " + expense.date;
+
+        details.appendChild(heading);
+
+        details.appendChild(info);
+
+        let price = document.createElement("span");
+
+        price.className = "amount";
+
+        price.textContent = "₹" + expense.amount.toFixed(2);
+
+        let deleteButton = document.createElement("button");
+
+        deleteButton.textContent = "Delete";
+
+        deleteButton.className = "delete-btn";
+
+        deleteButton.onclick = function() {
+
+            deleteExpense(expense.id);
+
+            filterExpenses();
+
+        };
+
+        item.appendChild(details);
+
+        item.appendChild(price);
+
+        item.appendChild(deleteButton);
+
+        list.appendChild(item);
+
+    });
+
+}
+
+    </script>
+
+    <script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+        navigator.serviceWorker.register("./service-worker.js")
+            .then(function() {
+                console.log("Service Worker Registered Successfully!");
+            })
+            .catch(function(error) {
+                console.log("Service Worker Error:", error);
+            });
+    });
+}
+</script>
+
+</body>
+
+</html>
